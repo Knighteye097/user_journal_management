@@ -1,101 +1,46 @@
 package com.knighteye097.user_management_service.service;
 
-import com.knighteye097.user_management_service.dto.UserEvent;
 import com.knighteye097.user_management_service.dto.UserRequest;
 import com.knighteye097.user_management_service.dto.UserResponse;
-import com.knighteye097.user_management_service.entity.EventType;
-import com.knighteye097.user_management_service.entity.User;
-import com.knighteye097.user_management_service.kafka.UserEventProducer;
-import com.knighteye097.user_management_service.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
-@Service
-@RequiredArgsConstructor
-public class UserService {
+/**
+ * Service interface for managing users.
+ */
+public interface UserService {
 
-    private final UserRepository userRepository;
-    private final UserEventProducer userEventProducer;
-    private final PasswordEncoder passwordEncoder;
+    /**
+     * Retrieves a list of all users.
+     *
+     * @return a list of {@code UserResponse} objects representing all users.
+     */
+    List<UserResponse> getAllUsers();
 
-    public List<UserResponse> getAllUsers() {
-        List<User> users = userRepository.findAll();
+    /**
+     * Retrieves a user by their email address.
+     *
+     * @param email the email of the user to retrieve.
+     * @return the {@code UserResponse} associated with the given email.
+     * @throws RuntimeException if the user is not found.
+     */
+    UserResponse getUserByEmail(String email);
 
-        userEventProducer.sendEvent(new UserEvent(
-                EventType.ALL_USER_FETCHED,
-                "system",
-                "system",
-                "Fetched all users",
-                LocalDateTime.now()
-        ));
+    /**
+     * Updates the information of an existing user identified by their email.
+     *
+     * @param email       the email of the user to update.
+     * @param updatedUser the new details for the user.
+     * @return the updated {@code UserResponse} object.
+     * @throws RuntimeException if the user is not found or the update fails.
+     */
+    UserResponse updateUserByEmail(String email, UserRequest updatedUser);
 
-        return users.stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
-    }
-
-    public UserResponse getUserByEmail(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        userEventProducer.sendEvent(new UserEvent(
-                EventType.USER_FETCHED_BY_ID,
-                user.getEmail(),
-                user.getName(),
-                "Fetched user with Mail_Id " + email,
-                LocalDateTime.now()
-        ));
-
-        return toResponse(user);
-    }
-
-    public UserResponse updateUserByEmail(String email, UserRequest updatedUserRequest) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        user.setName(updatedUserRequest.getName());
-        user.setPassword(passwordEncoder.encode(updatedUserRequest.getPassword()));
-        user.setRoles(updatedUserRequest.getRoles());
-
-        User saved = userRepository.save(user);
-
-        userEventProducer.sendEvent(new UserEvent(
-                EventType.USER_UPDATED,
-                saved.getEmail(),
-                saved.getName(),
-                "User updated: " + saved.getName(),
-                LocalDateTime.now()
-        ));
-
-        return toResponse(saved);
-    }
-
-    public void deleteUserByEmail(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        userRepository.deleteById(user.getId());
-
-        userEventProducer.sendEvent(new UserEvent(
-                EventType.USER_DELETED,
-                user.getEmail(),
-                user.getName(),
-                "User deleted with Mail_Id " + email,
-                LocalDateTime.now()
-        ));
-    }
-
-    private UserResponse toResponse(User user) {
-        return UserResponse.builder()
-                .id(user.getId())
-                .name(user.getName())
-                .email(user.getEmail())
-                .roles(user.getRoles().stream().map(Enum::name).collect(Collectors.toSet()))
-                .build();
-    }
+    /**
+     * Deletes a user account based on the email address.
+     *
+     * @param email the email of the user to delete.
+     * @throws RuntimeException if the user is not found or deletion fails.
+     */
+    void deleteUserByEmail(String email);
 }

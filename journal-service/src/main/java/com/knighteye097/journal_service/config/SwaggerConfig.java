@@ -15,7 +15,7 @@ public class SwaggerConfig {
                 .info(new Info()
                         .title("Journal Service API")
                         .version("1.0")
-                        .description("Handles user journal logging from Kafka events"))
+                        .description("API documentation for User Journal Service"))
                 .components(new Components()
                         .addSecuritySchemes("BearerAuth",
                                 new SecurityScheme()

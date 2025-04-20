@@ -15,7 +15,7 @@ public class SwaggerConfig {
                 .info(new Info()
                         .title("User Management Microservice API")
                         .version("1.0")
-                        .description("API documentation for User Management services"))
+                        .description("API documentation for User Management Service"))
                 .components(new Components()
                         .addSecuritySchemes("BearerAuth",
                                 new SecurityScheme()

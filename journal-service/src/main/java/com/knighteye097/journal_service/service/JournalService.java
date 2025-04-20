@@ -2,72 +2,63 @@ package com.knighteye097.journal_service.service;
 
 import com.knighteye097.journal_service.entity.EventType;
 import com.knighteye097.journal_service.entity.JournalEntry;
-import com.knighteye097.journal_service.repository.JournalRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
-@RequiredArgsConstructor
-public class JournalService {
+/**
+ * Service interface for managing journal entries.
+ * <p>
+ * Provides methods to retrieve journal events based on different criteria like all events,
+ * the events of a specific user, events filtered by email, or events filtered by event type.
+ * </p>
+ */
+public interface JournalService {
 
-    private final JournalRepository journalRepository;
+    /**
+     * Retrieves all journal entries.
+     *
+     * @return a ResponseEntity containing a list of all JournalEntry objects.
+     */
+    ResponseEntity<List<JournalEntry>> getAllEvents();
 
-    public ResponseEntity<List<JournalEntry>> getAllEvents() {
-        return ResponseEntity.ok(journalRepository.findAll());
-    }
+    /**
+     * Retrieves the journal entries specific to the authenticated user.
+     *
+     * @param authentication the Authentication object containing the user's details.
+     * @return a ResponseEntity containing a list of JournalEntry objects for the authenticated user.
+     */
+    ResponseEntity<List<JournalEntry>> getMyEvents(Authentication authentication);
 
-    public ResponseEntity<List<JournalEntry>> getMyEvents(Authentication authentication) {
-        String email = authentication.getName();
-        return ResponseEntity.ok(journalRepository.findByEmail(email));
-    }
+    /**
+     * Retrieves journal entries filtered by email.
+     * <p>
+     * If the authenticated user is an admin, it will return all entries or those for the specified email.
+     * For non-admin users, it will only return entries corresponding to the user's own email.
+     * </p>
+     *
+     * @param email the email filter; can be null or "all" for all entries.
+     * @param auth  the Authentication object containing the user's details.
+     * @return a ResponseEntity containing a list of matching JournalEntry objects,
+     * or a FORBIDDEN status for non-admins requesting entries of another user.
+     */
+    ResponseEntity<List<JournalEntry>> getByEmail(String email, Authentication auth);
 
-    public ResponseEntity<List<JournalEntry>> getByEmail(String email, Authentication auth) {
-        boolean isAdmin = hasRole(auth);
-        String currentUserEmail = auth.getName();
-
-        if (isAdmin) {
-            if (null == email || email.equalsIgnoreCase("all")) {
-                return ResponseEntity.ok(journalRepository.findAll());
-            } else {
-                return ResponseEntity.ok(journalRepository.findByEmail(email));
-            }
-        } else {
-            if (null == email || email.equalsIgnoreCase(currentUserEmail)) {
-                return ResponseEntity.ok(journalRepository.findByEmail(currentUserEmail));
-            } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
-        }
-    }
-
-    public ResponseEntity<List<JournalEntry>> getByType(EventType type, Authentication auth) {
-        boolean isAdmin = hasRole(auth);
-        String email = auth.getName();
-
-        List<JournalEntry> entries;
-
-        if(type == null) {
-            entries = isAdmin
-                    ? journalRepository.findAll()
-                    : journalRepository.findByEmail(email);
-        } else {
-            entries = isAdmin
-                    ? journalRepository.findByType(type)
-                    : journalRepository.findByTypeAndEmail(type, email);
-        }
-
-        return ResponseEntity.ok(entries);
-    }
-
-    private boolean hasRole(Authentication auth) {
-        return auth.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .anyMatch(r -> r.equals("ROLE_ADMIN"));
-    }
+    /**
+     * Retrieves journal entries filtered by event type.
+     * <p>
+     * If the type is null:
+     * <ul>
+     *     <li>Admins receive all entries.</li>
+     *     <li>Non-admins receive only entries for their own email.</li>
+     * </ul>
+     * Otherwise, admins receive all entries for that type, while non-admins receive only their own.
+     * </p>
+     *
+     * @param type the event type filter.
+     * @param auth the Authentication object containing the user's details.
+     * @return a ResponseEntity containing a list of JournalEntry objects matching the filter.
+     */
+    ResponseEntity<List<JournalEntry>> getByType(EventType type, Authentication auth);
 }
