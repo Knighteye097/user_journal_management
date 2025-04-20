@@ -37,7 +37,7 @@ public class AuthService {
         userRepository.save(user);
 
         eventProducer.sendEvent(new UserEvent(
-                "USER_CREATED",
+                EventType.REGISTERED,
                 user.getEmail(),
                 user.getName(),
                 "User created successfully",
@@ -64,6 +64,14 @@ public class AuthService {
 
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        eventProducer.sendEvent(new UserEvent(
+                EventType.LOGGED_IN,
+                user.getEmail(),
+                user.getName(),
+                "User logged-in successfully",
+                LocalDateTime.now()
+        ));
 
         String jwtToken = jwtService.generateToken(user.getEmail(), user.getRoles());
         return AuthResponse.builder()

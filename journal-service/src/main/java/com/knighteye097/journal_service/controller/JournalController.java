@@ -1,5 +1,6 @@
 package com.knighteye097.journal_service.controller;
 
+import com.knighteye097.journal_service.entity.EventType;
 import com.knighteye097.journal_service.entity.JournalEntry;
 import com.knighteye097.journal_service.service.JournalService;
 import lombok.RequiredArgsConstructor;
@@ -29,15 +30,15 @@ public class JournalController {
         return journalService.getMyEvents(authentication);
     }
 
-    @GetMapping("/email/{email}")
+    @GetMapping("/email")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public ResponseEntity<List<JournalEntry>> getByEmail(@PathVariable String email, Authentication auth) {
+    public ResponseEntity<List<JournalEntry>> getByEmail(@RequestParam(required = false) String email, Authentication auth) {
         return journalService.getByEmail(email, auth);
     }
 
-    @GetMapping("/type/{type}")
+    @GetMapping("/type")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public ResponseEntity<List<JournalEntry>> getByType(@PathVariable String type, Authentication auth) {
+    public ResponseEntity<List<JournalEntry>> getByType(@RequestParam(required = false) EventType type, Authentication auth) {
         return journalService.getByType(type, auth);
     }
 }

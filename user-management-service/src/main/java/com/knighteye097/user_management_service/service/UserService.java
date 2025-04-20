@@ -1,11 +1,14 @@
 package com.knighteye097.user_management_service.service;
 
 import com.knighteye097.user_management_service.dto.UserEvent;
+import com.knighteye097.user_management_service.dto.UserRequest;
 import com.knighteye097.user_management_service.dto.UserResponse;
+import com.knighteye097.user_management_service.entity.EventType;
 import com.knighteye097.user_management_service.entity.User;
 import com.knighteye097.user_management_service.kafka.UserEventProducer;
 import com.knighteye097.user_management_service.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -18,12 +21,13 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserEventProducer userEventProducer;
+    private final PasswordEncoder passwordEncoder;
 
     public List<UserResponse> getAllUsers() {
         List<User> users = userRepository.findAll();
 
         userEventProducer.sendEvent(new UserEvent(
-                "FETCH_ALL_USERS",
+                EventType.ALL_USER_FETCHED,
                 "system",
                 "system",
                 "Fetched all users",
@@ -35,33 +39,33 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    public UserResponse getUserById(Long id) {
-        User user = userRepository.findById(id)
+    public UserResponse getUserByEmail(String email) {
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         userEventProducer.sendEvent(new UserEvent(
-                "FETCH_USER_BY_ID",
+                EventType.USER_FETCHED_BY_ID,
                 user.getEmail(),
                 user.getName(),
-                "Fetched user with ID " + id,
+                "Fetched user with Mail_Id " + email,
                 LocalDateTime.now()
         ));
 
         return toResponse(user);
     }
 
-    public UserResponse updateUser(Long id, User updatedUser) {
-        User user = userRepository.findById(id)
+    public UserResponse updateUserByEmail(String email, UserRequest updatedUserRequest) {
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        user.setName(updatedUser.getName());
-        user.setEmail(updatedUser.getEmail());
-        user.setRoles(updatedUser.getRoles());
+        user.setName(updatedUserRequest.getName());
+        user.setPassword(passwordEncoder.encode(updatedUserRequest.getPassword()));
+        user.setRoles(updatedUserRequest.getRoles());
 
         User saved = userRepository.save(user);
 
         userEventProducer.sendEvent(new UserEvent(
-                "USER_UPDATED",
+                EventType.USER_UPDATED,
                 saved.getEmail(),
                 saved.getName(),
                 "User updated: " + saved.getName(),
@@ -71,17 +75,17 @@ public class UserService {
         return toResponse(saved);
     }
 
-    public void deleteUser(Long id) {
-        User user = userRepository.findById(id)
+    public void deleteUserByEmail(String email) {
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        userRepository.deleteById(id);
+        userRepository.deleteById(user.getId());
 
         userEventProducer.sendEvent(new UserEvent(
-                "USER_DELETED",
+                EventType.USER_DELETED,
                 user.getEmail(),
                 user.getName(),
-                "User deleted with ID " + id,
+                "User deleted with Mail_Id " + email,
                 LocalDateTime.now()
         ));
     }

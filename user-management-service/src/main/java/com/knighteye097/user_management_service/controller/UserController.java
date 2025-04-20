@@ -1,8 +1,8 @@
 package com.knighteye097.user_management_service.controller;
 
 
+import com.knighteye097.user_management_service.dto.UserRequest;
 import com.knighteye097.user_management_service.dto.UserResponse;
-import com.knighteye097.user_management_service.entity.User;
 import com.knighteye097.user_management_service.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,22 +24,29 @@ public class UserController {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/email/{email}")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public ResponseEntity<UserResponse> getUser(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.getUserById(id));
+    public ResponseEntity<UserResponse> getUserByEmail(
+            @PathVariable String email
+    ) {
+        return ResponseEntity.ok(userService.getUserByEmail(email));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/email/{email}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserResponse> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
-        return ResponseEntity.ok(userService.updateUser(id, updatedUser));
+    public ResponseEntity<UserResponse> updateUserByEmail(
+            @PathVariable String email,
+            @RequestBody UserRequest updatedUser
+    ) {
+        return ResponseEntity.ok(userService.updateUserByEmail(email, updatedUser));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/email/{email}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
+    public ResponseEntity<Void> deleteUserByEmail(
+            @PathVariable String email
+    ) {
+        userService.deleteUserByEmail(email);
         return ResponseEntity.noContent().build();
     }
 }

@@ -1,5 +1,6 @@
 package com.knighteye097.journal_service.service;
 
+import com.knighteye097.journal_service.entity.EventType;
 import com.knighteye097.journal_service.entity.JournalEntry;
 import com.knighteye097.journal_service.repository.JournalRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,39 +28,46 @@ public class JournalService {
     }
 
     public ResponseEntity<List<JournalEntry>> getByEmail(String email, Authentication auth) {
-        boolean isAdmin = hasRole(auth, "ROLE_ADMIN");
+        boolean isAdmin = hasRole(auth);
         String currentUserEmail = auth.getName();
 
         if (isAdmin) {
-            if (email.equalsIgnoreCase("all")) {
+            if (null == email || email.equalsIgnoreCase("all")) {
                 return ResponseEntity.ok(journalRepository.findAll());
             } else {
                 return ResponseEntity.ok(journalRepository.findByEmail(email));
             }
         } else {
-            if (email.equalsIgnoreCase(currentUserEmail)) {
-                return ResponseEntity.ok(journalRepository.findByEmail(email));
+            if (null == email || email.equalsIgnoreCase(currentUserEmail)) {
+                return ResponseEntity.ok(journalRepository.findByEmail(currentUserEmail));
             } else {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
         }
     }
 
-    public ResponseEntity<List<JournalEntry>> getByType(String type, Authentication auth) {
-        boolean isAdmin = hasRole(auth, "ROLE_ADMIN");
+    public ResponseEntity<List<JournalEntry>> getByType(EventType type, Authentication auth) {
+        boolean isAdmin = hasRole(auth);
+        String email = auth.getName();
 
-        if (isAdmin) {
-            return ResponseEntity.ok(journalRepository.findByType(type));
+        List<JournalEntry> entries;
+
+        if(type == null) {
+            entries = isAdmin
+                    ? journalRepository.findAll()
+                    : journalRepository.findByEmail(email);
         } else {
-            return ResponseEntity.ok(
-                    journalRepository.findByTypeAndEmail(type, auth.getName())
-            );
+            entries = isAdmin
+                    ? journalRepository.findByType(type)
+                    : journalRepository.findByTypeAndEmail(type, email);
         }
+
+        return ResponseEntity.ok(entries);
     }
 
-    private boolean hasRole(Authentication auth, String role) {
+    private boolean hasRole(Authentication auth) {
         return auth.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .anyMatch(r -> r.equals(role));
+                .anyMatch(r -> r.equals("ROLE_ADMIN"));
     }
 }

@@ -23,7 +23,7 @@ public class JournalEntry {
 
     private String name;
 
-    private String type;
+    private EventType type;
 
     private String message;
 

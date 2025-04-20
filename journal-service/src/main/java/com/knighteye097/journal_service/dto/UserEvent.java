@@ -1,5 +1,6 @@
 package com.knighteye097.journal_service.dto;
 
+import com.knighteye097.journal_service.entity.EventType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,7 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserEvent {
-    private String type;
+    private EventType type;
     private String email;
     private String name;
     private String message;

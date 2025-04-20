@@ -5,7 +5,7 @@ import com.knighteye097.user_management_service.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.*;
-        import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Service;
 
 import java.util.stream.Collectors;
 
