@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 @Service
 public class JwtService {
 
-    private static final String SECRET_KEY = "d4ea8ab22f00d691c74604e2fdcc83ab97e9f1aa32d0858847963180ee1fdbb818383fb33efe9225b518474cda7807a856655a29c76560d5c8fd40d00c7f0194";
+    private static final String SECRET_KEY = "YOUR_SECRET_KEY";
 
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
