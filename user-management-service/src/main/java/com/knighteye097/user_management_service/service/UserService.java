@@ -22,7 +22,6 @@ public class UserService {
     public List<UserResponse> getAllUsers() {
         List<User> users = userRepository.findAll();
 
-        // Send event
         userEventProducer.sendEvent(new UserEvent(
                 "FETCH_ALL_USERS",
                 "system",

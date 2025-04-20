@@ -3,10 +3,10 @@ package com.knighteye097.user_management_service.kafka;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.knighteye097.user_management_service.dto.UserEvent;
-import com.knighteye097.user_management_service.entity.User;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +19,7 @@ import java.util.Map;
 public class UserEventProducer {
 
     private final KafkaTemplate<String, String> kafkaTemplate;
+    private final ObjectMapper objectMapper;
 
     private static final String TOPIC = "user-events";
 
@@ -30,7 +31,7 @@ public class UserEventProducer {
 
     public void sendEvent(UserEvent event) {
         try {
-            String json = new ObjectMapper().writeValueAsString(event);
+            String json = objectMapper.writeValueAsString(event);
             kafkaTemplate.send(TOPIC, json);
 
             log.info("Sent Kafka message to '{}': {}", TOPIC, json);
