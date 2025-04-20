@@ -1,7 +1,10 @@
 package com.knighteye097.journal_service.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
@@ -10,13 +13,22 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserEvent {
+public class JournalEntry {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String email;
+
+    private String name;
+
+    private String type;
+
     private String message;
 
     private LocalDateTime timestamp;
+
+    @Column(columnDefinition = "TEXT")
+    private String metadata;
 }

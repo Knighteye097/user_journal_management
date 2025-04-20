@@ -11,6 +11,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,8 +36,13 @@ public class AuthService {
 
         userRepository.save(user);
 
-        // TODO: publish event to Kafka here
-        eventProducer.sendUserCreatedEvent(user);
+        eventProducer.sendEvent(new UserEvent(
+                "USER_CREATED",
+                user.getEmail(),
+                user.getName(),
+                "User created successfully",
+                LocalDateTime.now()
+        ));
 
         String jwtToken = jwtService.generateToken(user.getEmail(), user.getRoles());
         return AuthResponse.builder()
