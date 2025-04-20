@@ -1,10 +1,13 @@
 # 🧩 User & Journal Management Microservices
 
-This project is a **microservice-based system** built with **Java 21**, **Spring Boot 3**, and **Kafka**, supporting user management and journaling capabilities. It is secured via **JWT** and exposes APIs via **Swagger**. All services are containerized using **Docker**.
+A Java 21-based microservice project that manages user operations (registration, login, CRUD) and captures user activity logs via Kafka messaging. It consists of two microservices:
+
+- **User Management Service**: Handles user registration, login, updates, and deletion.
+- **Journal Service**: Records user-related events and provides role-based access to view them.
 
 ---
 
-## 🏗️ Tech Stack
+## 🔧 Tech Stack
 
 - Java 21
 - Spring Boot 3
@@ -31,12 +34,22 @@ This project is a **microservice-based system** built with **Java 21**, **Spring
 Run the following to generate jar files (without running tests):
 
 ```bash
-mvn clean package -DskipTests
+git clone https://github.com/Knighteye097/user_journal_management.git
+cd user_journal_management
+```
+
+```bash
+cd user-management-service
+mvn clean install -DskipTests
+
+cd ../journal-service
+mvn clean install -DskipTests
 ```
 
 ### Step 2: Run with Docker Compose
 
 ```bash
+cd ..
 docker-compose up --build
 ```
 
@@ -72,7 +85,7 @@ docker-compose up --build
 
 ```json
 {
-  "name": "Admin Bhai",
+  "name": "Admin User",
   "email": "admin@example.com",
   "password": "admin123",
   "roles": ["ROLE_ADMIN"]
@@ -85,7 +98,7 @@ docker-compose up --build
 {
   "name": "User One",
   "email": "user1@example.com",
-  "password": "user123",
+  "password": "user1234",
   "roles": ["ROLE_USER"]
 }
 ```
@@ -94,7 +107,7 @@ docker-compose up --build
 {
   "name": "User Two",
   "email": "user2@example.com",
-  "password": "user123",
+  "password": "user1234",
   "roles": ["ROLE_USER"]
 }
 ```
@@ -134,6 +147,13 @@ docker-compose up --build
 
 - User Management Swagger: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
 - Journal Service Swagger: [http://localhost:8081/swagger-ui.html](http://localhost:8081/swagger-ui.html)
+
+---
+
+## 🧠 Notes
+
+- The project uses two predefined roles: `ROLE_USER` and `ROLE_ADMIN`
+- All logs are sent to Kafka, consumed by the Journal Service, and stored in MySQL.
 
 ---
 
