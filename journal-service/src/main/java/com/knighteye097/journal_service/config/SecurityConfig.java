@@ -51,7 +51,7 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(); // even if not used
+        return new BCryptPasswordEncoder();
     }
 
     @Bean

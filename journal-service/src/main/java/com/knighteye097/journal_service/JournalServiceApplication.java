@@ -17,6 +17,6 @@ public class JournalServiceApplication {
 
 	@PostConstruct
 	public void logKafkaConfig() {
-		System.out.println("📦 Kafka is set to: " + kafkaServers);
+		System.out.println("Kafka is set to: " + kafkaServers);
 	}
 }

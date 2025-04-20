@@ -12,5 +12,5 @@ public class RegisterRequest {
     private String name;
     private String email;
     private String password;
-    private Set<String> roles; // pass roles as strings like "ROLE_USER"
+    private Set<String> roles;
 }

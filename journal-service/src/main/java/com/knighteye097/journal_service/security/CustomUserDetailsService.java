@@ -11,7 +11,6 @@ import java.util.*;
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
 
-    // No DB here — decode roles from token only
     @Override
     public UserDetails loadUserByUsername(String email) {
         return new User(email, "", List.of(new SimpleGrantedAuthority("ROLE_USER")));
